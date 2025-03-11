@@ -1,9 +1,9 @@
 ---
 name: Bug report
 about: 버그 리포트 템플릿을 통해 이슈를 생성해주세요.
-title: ''
-labels: ''
-assignees: ''
+title: ""
+labels: ""
+assignees: ""
 
 ---
 
