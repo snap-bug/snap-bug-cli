@@ -1,0 +1,17 @@
+{
+  "name": "snap-bug-cli",
+  "version": "1.0.0",
+  "engines": {
+    "node": "22.11.0"
+  },
+  "main": "index.js",
+  "bin": {
+    "snapbug": "./index.js"
+  },
+  "type": "module",
+  "license": "ISC",
+  "dependencies": {
+    "chalk": "^5.4.1",
+    "commander": "^13.1.0"
+  }
+}
