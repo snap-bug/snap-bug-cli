@@ -12,6 +12,22 @@
   "license": "ISC",
   "dependencies": {
     "chalk": "^5.4.1",
-    "commander": "^13.1.0"
+    "commander": "^13.1.0",
+    "eslint": "^8.57.1",
+    "eslint-js": "github:eslint/js",
+    "eslint-plugin-import": "^2.31.0",
+    "eslint-plugin-n": "^16.6.2",
+    "eslint-plugin-promise": "^6.6.0",
+    "globals": "^16.0.0"
+  },
+  "scripts": {
+    "prepare": "husky",
+    "format": "prettier --cache --write .",
+    "lint": "eslint ."
+  },
+  "devDependencies": {
+    "eslint-config-standard": "^17.1.0",
+    "husky": "9.1.7",
+    "prettier": "3.5.3"
   }
 }
