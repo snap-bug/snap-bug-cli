@@ -1,9 +1,9 @@
 ---
 name: Feature request
 about: 해당 이슈 템플릿을 통해 이슈를 생성해주세요.
-title: ''
-labels: ''
-assignees: ''
+title: ""
+labels: ""
+assignees: ""
 
 ---
 
