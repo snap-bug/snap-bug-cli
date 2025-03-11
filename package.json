@@ -22,7 +22,8 @@
   },
   "scripts": {
     "prepare": "husky",
-    "format": "prettier --cache --write ."
+    "format": "prettier --cache --write .",
+    "lint": "eslint ."
   },
   "devDependencies": {
     "eslint-config-standard": "^17.1.0",
