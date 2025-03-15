@@ -49,3 +49,22 @@ const isValidState = (stateValue) => {
   return true;
 };
 
+const getStateData = (fiber) => {
+  const stateData = {};
+  let currentState = fiber.memoizedState;
+  let index = 0;
+
+  while (currentState) {
+    const stateValue = currentState.memoizedState;
+
+    if (isValidState(stateValue)) {
+      stateData[`state_${index}`] = stateValue;
+    }
+
+    currentState = currentState.next;
+    index++;
+  }
+
+  return stateData;
+};
+
