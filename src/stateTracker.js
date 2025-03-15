@@ -68,3 +68,58 @@ const getStateData = (fiber) => {
   return stateData;
 };
 
+const traverseFiberTree = (fiberNode, newHistory) => {
+  while (fiberNode) {
+    if (fiberNode.memoizedState) {
+      const stateData = getStateData(fiberNode);
+      const componentName = fiberNode.type?.name || "Anonymous";
+      const timestamp = new Date().toISOString();
+
+      let rootComponent = fiberNode;
+
+      while (rootComponent.return && rootComponent.return.type) {
+        rootComponent = rootComponent.return;
+      }
+
+      const rootComponentName = rootComponent.type?.name || "no root";
+
+      let pageRecord = newHistory.find((page) => page.rootComponent === rootComponentName);
+
+      if (!pageRecord) {
+        pageRecord = { rootComponent: rootComponentName, changedComponents: [] };
+        newHistory.push(pageRecord);
+      }
+
+      let componentRecord = pageRecord.changedComponents.find(
+        (component) => component.name === componentName
+      );
+
+      if (!componentRecord) {
+        componentRecord = { name: componentName, stateHistory: [] };
+        pageRecord.changedComponents.push(componentRecord);
+      }
+
+      if (stateData) {
+        componentRecord.stateHistory.push({
+          timestamp,
+          state: stateData,
+        });
+      }
+    }
+
+    if (fiberNode.child) {
+      fiberNode = fiberNode.child;
+    } else {
+      while (fiberNode && !fiberNode.sibling) {
+        fiberNode = fiberNode.return;
+      }
+
+      if (fiberNode) {
+        fiberNode = fiberNode.sibling;
+      }
+    }
+  }
+
+  return newHistory;
+};
+
