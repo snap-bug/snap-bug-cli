@@ -1,3 +1,7 @@
+import fs from "fs";
+import path from "path";
+import util from "./utils/util";
+
 export const getFiberRoot = () => {
   /* eslint-disable no-undef */
   const elements = document.body.children;
@@ -123,3 +127,58 @@ const traverseFiberTree = (fiberNode, newHistory) => {
   return newHistory;
 };
 
+const STATE_FILE = path.join(process.cwd(), "snapbug-state.json");
+const JSON_INDENTATION = 2;
+
+export const saveStateToJson = async () => {
+  await util.delay(0);
+
+  const fiberRoot = getFiberRoot();
+  if (!fiberRoot) return;
+
+  const newHistory = [];
+  traverseFiberTree(fiberRoot.child, newHistory);
+
+  let updatedHistory = [];
+
+  if (fs.existsSync(STATE_FILE)) {
+    const existingData = fs.readFileSync(STATE_FILE, "utf-8");
+    updatedHistory = existingData ? JSON.parse(existingData) : [];
+  }
+
+  newHistory.forEach((newEntry) => {
+    let rootEntry = updatedHistory.find((entry) => entry.rootComponent === newEntry.rootComponent);
+
+    if (!rootEntry) {
+      rootEntry = { rootComponent: newEntry.rootComponent, changedComponents: [] };
+      updatedHistory.push(rootEntry);
+    }
+
+    newEntry.changedComponents.forEach((newComponent) => {
+      let componentRecord = rootEntry.changedComponents.find(
+        (component) => component.name === newComponent.name
+      );
+
+      if (!componentRecord) {
+        componentRecord = { name: newComponent.name, stateHistory: [] };
+        rootEntry.changedComponents.push(componentRecord);
+      }
+
+      newComponent.stateHistory.forEach((newState) => {
+        const timestampEntry = componentRecord.stateHistory.find(
+          (history) => history.timestamp === newState.timestamp
+        );
+
+        if (timestampEntry) {
+          Object.assign(timestampEntry.state, newState.state);
+        } else {
+          componentRecord.stateHistory.push(newState);
+        }
+      });
+    });
+  });
+
+  fs.writeFileSync(STATE_FILE, JSON.stringify(updatedHistory, null, JSON_INDENTATION));
+
+  return updatedHistory;
+};
