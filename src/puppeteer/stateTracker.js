@@ -1,3 +1,5 @@
+import { WEBSOCKET_URL } from "../utils/config";
+
 export const trackStateChanges = async (page) => {
   await page.evaluate(() => {
     window.snapbugState = {};
@@ -65,6 +67,43 @@ export const trackStateChanges = async (page) => {
         fiberNode = fiberNode.child;
       }
       return newState;
+    };
+
+    const detectStateChange = () => {
+      const fiberRoot = getFiberRoot();
+      if (!fiberRoot) return;
+
+      const newState = traverseFiberTree(fiberRoot.child);
+      if (JSON.stringify(window.snapbugState) !== JSON.stringify(newState)) {
+        window.snapbugState = newState;
+        console.log("⚡ 상태 변경 감지됨:", newState);
+
+        if (window.snapbugSocket && window.snapbugSocket.readyState === 1) {
+          window.snapbugSocket.send(JSON.stringify({ event: "state_update", data: newState }));
+        }
+
+        fetch(`${WEBSOCKET_URL}/saveState`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ state: newState }),
+        });
+      }
+    };
+
+    const fiberRoot = getFiberRoot();
+    if (fiberRoot) {
+      const originalSetState = fiberRoot.memoizedState?.baseState?.setState;
+      if (originalSetState) {
+        fiberRoot.memoizedState.baseState.setState = (...args) => {
+          originalSetState.apply(fiberRoot.memoizedState.baseState, args);
+          detectStateChange();
+        };
+      }
+    }
+
+    window.snapbugSocket = new WebSocket(WEBSOCKET_URL);
+    window.snapbugSocket.onopen = () => {
+      console.log("WebSocket 연결 완료 - React 상태 변경 감지 시작");
     };
   });
 };
