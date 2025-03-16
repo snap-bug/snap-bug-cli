@@ -1,4 +1,5 @@
 import puppeteer from "puppeteer";
+import { config } from "../utils/config";
 
 export const openBrowser = async () => {
   const browser = await puppeteer.launch({
@@ -13,7 +14,7 @@ export const getReactPage = async (browser) => {
   const page = await browser.newPage();
 
   try {
-    await page.goto("http://localhost:3000", { waitUntil: "networkidle0" });
+    await page.goto(config.USER_DEV_URL, { waitUntil: "networkidle0" });
 
     return page;
   } catch (error) {
