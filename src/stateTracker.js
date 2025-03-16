@@ -22,7 +22,7 @@ export const getFiberRoot = () => {
 const isValidState = (stateValue) => {
   if (typeof stateValue !== "object") return true;
 
-  const invalidKeys = [
+  const invalidKeys = new Set([
     "baseState",
     "baseQueue",
     "deps",
@@ -33,10 +33,10 @@ const isValidState = (stateValue) => {
     "_source",
     "queue",
     "tag",
-  ];
+  ]);
 
   for (const key of Object.keys(stateValue)) {
-    if (invalidKeys.includes(key)) {
+    if (invalidKeys.has(key)) {
       return false;
     }
   }
