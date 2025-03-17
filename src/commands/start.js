@@ -1,9 +1,9 @@
 import fs from "fs";
 import path from "path";
 import { spawn } from "child_process";
+import WebSocket from "ws";
 import { openBrowser, getReactPage } from "../puppeteer/browser.js";
 import { trackStateChanges } from "../puppeteer/stateTracker.js";
-import WebSocket from "ws";
 import { WEBSOCKET_URL } from "../utils/config.js";
 
 const packageJsonPath = path.join(process.cwd(), "package.json");
