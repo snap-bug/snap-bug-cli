@@ -50,7 +50,7 @@ wss.on("connection", (ws) => {
       if (parsed.event === "state_update") {
         console.log("실시간 상태 업데이트:", parsed.data);
 
-        clients.forEach(client => {
+        clients.forEach((client) => {
           if (client.readyState === WebSocket.OPEN) {
             client.send(JSON.stringify({ event: "state_update", data: parsed.data }));
           }

@@ -4,7 +4,6 @@ export const trackStateChanges = async (page) => {
   await page.evaluate(() => {
     window.snapbugState = {};
 
-    /* eslint-disable no-unused-vars */
     const getFiberRoot = () => {
       const elements = document.body.children;
       for (let i = 0; i < elements.length; i++) {
@@ -52,7 +51,6 @@ export const trackStateChanges = async (page) => {
       return true;
     };
 
-    /* eslint-disable no-unused-vars */
     const traverseFiberTree = (fiberNode) => {
       const newState = {};
       while (fiberNode) {
@@ -76,7 +74,7 @@ export const trackStateChanges = async (page) => {
       const newState = traverseFiberTree(fiberRoot.child);
       if (JSON.stringify(window.snapbugState) !== JSON.stringify(newState)) {
         window.snapbugState = newState;
-        console.log("⚡ 상태 변경 감지됨:", newState);
+        console.log("상태 변경 감지됨:", newState);
 
         if (window.snapbugSocket && window.snapbugSocket.readyState === 1) {
           window.snapbugSocket.send(JSON.stringify({ event: "state_update", data: newState }));
@@ -93,6 +91,7 @@ export const trackStateChanges = async (page) => {
     const fiberRoot = getFiberRoot();
     if (fiberRoot) {
       const originalSetState = fiberRoot.memoizedState?.baseState?.setState;
+
       if (originalSetState) {
         fiberRoot.memoizedState.baseState.setState = (...args) => {
           originalSetState.apply(fiberRoot.memoizedState.baseState, args);
