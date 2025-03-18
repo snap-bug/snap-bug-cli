@@ -1,16 +1,37 @@
 import config from "../utils/config.js";
 
 export const trackStateChanges = async (page) => {
-  await page.evaluate(
-    (wsUrl, apiUrl) => {
-      if (!window.snapbugSocket || window.snapbugSocket.readyState !== 1) {
-        window.snapbugSocket = new WebSocket(wsUrl);
-        window.snapbugSocket.onopen = () => {
-          console.log("WebSocket 연결 완료 - React 상태 변경 감지 시작");
-        };
-      }
+  try {
+    await page.waitForSelector("#root, #app", { timeout: config.WAIT_TIME });
 
+    const result = await page.evaluate((wsUrl) => {
       window.snapbugState = {};
+
+      const connectWebSocket = () => {
+        if (
+          !window.snapbugSocket ||
+          window.snapbugSocket.readyState === WebSocket.CLOSED ||
+          window.snapbugSocket.readyState === WebSocket.CLOSING
+        ) {
+          console.log("WebSocket 연결 시도...");
+          window.snapbugSocket = new WebSocket(wsUrl);
+
+          window.snapbugSocket.onopen = () => {
+            console.log("WebSocket 연결 완료 - React 상태 변경 감지 시작");
+            detectStateChange();
+          };
+
+          window.snapbugSocket.onclose = () => {
+            console.log("WebSocket 연결 종료 - 5초 후 재연결...");
+            setTimeout(connectWebSocket, config.WAIT_TIME);
+          };
+
+          window.snapbugSocket.onerror = (error) => {
+            console.error("WebSocket 연결 오류:", error);
+          };
+        }
+      };
+      connectWebSocket();
 
       const getFiberRoot = () => {
         const elements = document.body.children;
