@@ -60,6 +60,11 @@ const serverProcess = startProjectServer();
 
 if (serverProcess) {
   startDebugging();
+
+  serverProcess.on("exit", () => {
+    console.log("서버 종료 감지: Puppeteer 브라우저를 닫습니다.");
+    isDebugging = false;
+  });
 }
 
 export default startDebugging;
