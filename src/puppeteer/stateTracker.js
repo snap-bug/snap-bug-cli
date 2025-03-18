@@ -1,4 +1,4 @@
-import { WEBSOCKET_URL, API_SERVER_URL } from "../utils/config";
+import config from "../utils/config.js";
 
 export const trackStateChanges = async (page) => {
   await page.evaluate(

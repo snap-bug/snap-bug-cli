@@ -1,8 +1,8 @@
 import express from "express";
-import WebSocket from "ws";
-import fs from "fs/promises";
 import path from "path";
-import { SOCKET_PORT, API_SERVER_PORT } from "../utils/config";
+import fs from "fs/promises";
+import { WebSocketServer } from "ws";
+import config from "../utils/config.js";
 
 const app = express();
 app.use(express.json());
