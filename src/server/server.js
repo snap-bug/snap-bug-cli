@@ -12,30 +12,30 @@ const STATE_FILE = path.join(process.cwd(), "snapbug-state.json");
 
 const clients = new Set();
 
-app.post("/saveState", async (req, res) => {
-  const newState = req.body.state;
-
+async function saveStateToFile(state) {
   try {
     let existingData = [];
 
-    try {
-      if (await fileExists(STATE_FILE)) {
+    if (await fileExists(STATE_FILE)) {
+      try {
         const fileData = await fs.readFile(STATE_FILE, "utf-8");
         existingData = fileData ? JSON.parse(fileData) : [];
+      } catch (error) {
+        console.error("상태 파일 읽기 오류:", error);
       }
-    } catch (error) {
-      console.error("상태 파일 읽기 오류:", error);
-      return res.status(INTERNAL_SERVER_ERROR).json({ error: "파일 읽기 오류" });
+    } else {
+      console.log("📁 상태 파일이 존재하지 않습니다. 새로 생성합니다.");
+      await fs.writeFile(STATE_FILE, JSON.stringify([], null, config.JSON_INDENTATION));
     }
 
-    existingData.push({ timestamp: new Date().toISOString(), state: newState });
+    existingData.push({ timestamp: new Date().toISOString(), state });
 
     await fs.writeFile(STATE_FILE, JSON.stringify(existingData, null, config.JSON_INDENTATION));
+    console.log("상태 저장 완료:", state);
   } catch (error) {
     console.error("상태 파일 저장 오류:", error);
-    res.status(INTERNAL_SERVER_ERROR).json({ error: "파일 저장 오류" });
   }
-});
+}
 
 wss.on("connection", (ws) => {
   console.log("클라이언트가 WebSocket에 연결되었습니다.");
@@ -47,8 +47,10 @@ wss.on("connection", (ws) => {
       if (parsed.event === "state_update") {
         console.log("실시간 상태 업데이트:", parsed.data);
 
+        await saveStateToFile(parsed.data);
+
         clients.forEach((client) => {
-          if (client.readyState === WebSocket.OPEN) {
+          if (client.readyState === ws.OPEN) {
             client.send(JSON.stringify({ event: "state_update", data: parsed.data }));
           }
         });
