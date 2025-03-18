@@ -1,6 +1,7 @@
 #!/usr/bin/env node
 
 import { program } from "commander";
+import startDebugging from "../src/commands/start.js";
 
 program
   .version("1.0.0")
@@ -10,7 +11,8 @@ program
 program
   .command("start")
   .description("디버깅 모드를 시작합니다. 상태 기록을 활성화합니다.")
-  .action(() => {
+  .action(async () => {
+    await startDebugging();
     console.log("상태 기록 중 입니다.");
   });
 
