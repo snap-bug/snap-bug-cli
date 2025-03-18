@@ -47,7 +47,7 @@ const startDebugging = async () => {
 
   ws.on("open", async () => {
     console.log("WebSocket 서버에 연결되었습니다.");
-    await trackStateChanges(page, ws);
+    await trackStateChanges(page);
   });
 
   ws.on("close", () => {
@@ -57,12 +57,9 @@ const startDebugging = async () => {
 };
 
 const serverProcess = startProjectServer();
-const WAIT_TIME = 5000;
 
 if (serverProcess) {
-  setTimeout(() => {
-    startDebugging();
-  }, WAIT_TIME);
+  startDebugging();
 }
 
 export default startDebugging;

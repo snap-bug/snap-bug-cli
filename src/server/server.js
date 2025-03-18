@@ -9,9 +9,7 @@ app.use(express.json());
 
 const wss = new WebSocket.Server({ port: SOCKET_PORT });
 const STATE_FILE = path.join(process.cwd(), "snapbug-state.json");
-const JSON_INDENTATION = 2;
 
-const INTERNAL_SERVER_ERROR = 500;
 const clients = new Set();
 
 app.post("/saveState", async (req, res) => {
