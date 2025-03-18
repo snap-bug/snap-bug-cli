@@ -96,7 +96,7 @@ export const trackStateChanges = async (page) => {
         return newState;
       };
 
-      const detectStateChange = async () => {
+      const detectStateChange = () => {
         const fiberRoot = getFiberRoot();
         if (!fiberRoot) return;
 
@@ -105,41 +105,23 @@ export const trackStateChanges = async (page) => {
           window.snapbugState = newState;
           console.log("상태 변경 감지됨:", newState);
 
-          if (window.snapbugSocket && window.snapbugSocket.readyState === 1) {
+          if (window.snapbugSocket && window.snapbugSocket.readyState === WebSocket.OPEN) {
             window.snapbugSocket.send(JSON.stringify({ event: "state_update", data: newState }));
-          }
-
-          try {
-            const response = await fetch(`${apiUrl}/saveState`, {
-              method: "POST",
-              headers: { "Content-Type": "application/json" },
-              body: JSON.stringify({ state: newState }),
-            });
-
-            if (!response.ok) {
-              throw new Error(`서버 응답 오류: ${response.status}`);
-            }
-
-            console.log("상태 저장 완료");
-          } catch (error) {
-            console.error("상태 저장 API 오류:", error);
           }
         }
       };
 
-      const fiberRoot = getFiberRoot();
-      if (fiberRoot?.memoizedState?.baseState) {
-        const { setState } = fiberRoot.memoizedState.baseState;
-        if (typeof setState === "function") {
-          const originalSetState = setState.bind(fiberRoot.memoizedState.baseState);
-          fiberRoot.memoizedState.baseState.setState = (...args) => {
-            originalSetState(...args);
-            detectStateChange();
-          };
-        }
+      const observer = new MutationObserver(detectStateChange);
+      const rootElement = document.getElementById("root") || document.getElementById("app");
+      if (rootElement) {
+        observer.observe(rootElement, { childList: true, subtree: true });
       }
-    },
-    WEBSOCKET_URL,
-    API_SERVER_URL
-  );
+
+      return "Puppeteer evaluate 실행 완료!";
+    }, config.WEBSOCKET_URL);
+
+    console.log("page.evaluate 실행 결과:", result);
+  } catch (error) {
+    console.error("page.evaluate 실행 실패:", error);
+  }
 };
