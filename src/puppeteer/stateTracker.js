@@ -4,7 +4,7 @@ export const trackStateChanges = async (page) => {
   try {
     await page.waitForSelector("#root, #app", { timeout: config.WAIT_TIME });
 
-    const result = await page.evaluate(
+    const evaluationResult = await page.evaluate(
       (wsUrl, waitTime) => {
         window.snapbugState = {};
 
@@ -124,7 +124,7 @@ export const trackStateChanges = async (page) => {
       config.WAIT_TIME
     );
 
-    console.log("page.evaluate 실행 결과:", result);
+    console.log("page.evaluate 실행 결과:", evaluationResult);
   } catch (error) {
     console.error("page.evaluate 실행 실패:", error);
   }
