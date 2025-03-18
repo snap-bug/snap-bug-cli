@@ -43,7 +43,7 @@ const startDebugging = async () => {
   const browser = await openBrowser();
   const page = await getReactPage(browser);
 
-  const ws = new WebSocket(WEBSOCKET_URL);
+  const ws = new WebSocket(config.WEBSOCKET_URL);
 
   ws.on("open", async () => {
     console.log("WebSocket 서버에 연결되었습니다.");

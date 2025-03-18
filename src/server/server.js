@@ -7,7 +7,7 @@ import config from "../utils/config.js";
 const app = express();
 app.use(express.json());
 
-const wss = new WebSocket.Server({ port: SOCKET_PORT });
+const wss = new WebSocketServer({ port: config.SOCKET_PORT });
 const STATE_FILE = path.join(process.cwd(), "snapbug-state.json");
 
 const clients = new Set();
@@ -30,9 +30,7 @@ app.post("/saveState", async (req, res) => {
 
     existingData.push({ timestamp: new Date().toISOString(), state: newState });
 
-    await fs.writeFile(STATE_FILE, JSON.stringify(existingData, null, JSON_INDENTATION));
-    console.log("상태 저장 완료:", newState);
-    res.json({ message: "State saved" });
+    await fs.writeFile(STATE_FILE, JSON.stringify(existingData, null, config.JSON_INDENTATION));
   } catch (error) {
     console.error("상태 파일 저장 오류:", error);
     res.status(INTERNAL_SERVER_ERROR).json({ error: "파일 저장 오류" });
@@ -66,8 +64,10 @@ wss.on("connection", (ws) => {
   });
 });
 
-app.listen(API_SERVER_PORT, () => console.log(`API 서버가 포트 ${API_SERVER_PORT}에서 실행 중...`));
-console.log(`WebSocket 서버가 포트 ${SOCKET_PORT}에서 실행 중...`);
+app.listen(config.API_SERVER_PORT, () =>
+  console.log(`API 서버가 포트 ${config.API_SERVER_PORT}에서 실행 중...`)
+);
+console.log(`WebSocket 서버가 포트 ${config.SOCKET_PORT}에서 실행 중...`);
 
 async function fileExists(filePath) {
   try {
