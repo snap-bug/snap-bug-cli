@@ -32,7 +32,12 @@ const startProjectServer = () => {
   return serverProcess;
 };
 
+let isDebugging = false;
+
 const startDebugging = async () => {
+  if (isDebugging) return;
+  isDebugging = true;
+
   console.log("React 상태 추적을 시작합니다...");
 
   const browser = await openBrowser();
