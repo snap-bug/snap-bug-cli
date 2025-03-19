@@ -6,6 +6,7 @@ import { openBrowser, getReactPage } from "../puppeteer/browser.js";
 import { trackStateChanges } from "../puppeteer/stateTracker.js";
 import config from "../utils/config.js";
 
+const PID_FILE = path.join(process.cwd(), "snapbug.pid");
 const packageJsonPath = path.join(process.cwd(), "package.json");
 
 const startProjectServer = () => {
@@ -24,6 +25,12 @@ const startProjectServer = () => {
   }
 
   const serverProcess = spawn("npm", ["run", "dev"], { shell: true });
+
+  try {
+    fs.writeFile(PID_FILE, serverProcess.pid.toString(), "utf-8");
+  } catch (err) {
+    console.error("PID 파일 저장을 실패했습니다.", err);
+  }
 
   serverProcess.on("error", (err) => {
     console.error("서버 실행 중 오류가 발생했습니다.:", err.message);
