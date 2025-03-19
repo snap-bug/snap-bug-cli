@@ -1,10 +1,8 @@
 import fs from "fs";
 import path from "path";
 import { spawn } from "child_process";
-import { WebSocket } from "ws";
 import { openBrowser, getReactPage } from "../puppeteer/browser.js";
 import { trackStateChanges } from "../puppeteer/stateTracker.js";
-import config from "../utils/config.js";
 
 const PID_FILE = path.join(process.cwd(), "snapbug.pid");
 const packageJsonPath = path.join(process.cwd(), "package.json");
@@ -50,17 +48,20 @@ const startDebugging = async () => {
   const browser = await openBrowser();
   const page = await getReactPage(browser);
 
-  const ws = new WebSocket(config.WEBSOCKET_URL);
+  if (!page) {
+    await browser.close();
 
-  ws.on("open", async () => {
-    console.log("WebSocket 서버에 연결되었습니다.");
+    isDebugging = false;
+    return;
+  }
+
+  try {
     await trackStateChanges(page);
-  });
+  } catch (err) {
+    console.log("상태 추적 중 오류가 발생했습니다.", err);
+  }
 
-  ws.on("close", () => {
-    console.log("WebSocket 연결이 종료되었습니다.");
-    browser.close();
-  });
+  return { browser, page };
 };
 
 const serverProcess = startProjectServer();
