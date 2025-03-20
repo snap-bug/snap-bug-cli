@@ -51,10 +51,15 @@ export async function getStateHistory() {
     if (!(await fileExists(STATE_FILE))) return [];
 
     const fileData = await fs.readFile(STATE_FILE, "utf-8");
-
+try {
     return fileData ? JSON.parse(fileData) : [];
+} catch (err) {
+      console.error("파일 상태를 확인해주세요.", err);
+      return [];
+    }
   } catch (err) {
     console.error("상태 파일 조회 오류");
+return [];
   }
 }
 
