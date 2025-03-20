@@ -21,26 +21,31 @@ export async function saveStateToFile(state) {
   try {
     let existingData = [];
 
-    if (await fileExists(STATE_FILE)) {
-      try {
-        const fileData = await fs.readFile(STATE_FILE, "utf-8");
-        existingData = fileData ? JSON.parse(fileData) : [];
-      } catch (error) {
-        console.error("상태 파일 읽기 오류:", error);
-      }
-    } else {
-      console.log("📁 상태 파일이 존재하지 않습니다. 새로 생성합니다.");
-      await fs.writeFile(STATE_FILE, JSON.stringify([], null, config.JSON_INDENTATION));
+
+app.post("/states", async (req, res) => {
+  try {
+    const { timestamp, state, dom } = req.body;
+
+    if (!timestamp || !state) {
+      return res.status(httpStatusCode.BAD_REQUEST).json({ errorMessage: "Bad Request" });
     }
 
-    existingData.push({ timestamp: new Date().toISOString(), state });
+    const updatedHistory = await saveStateToFile({ timestamp, state, dom });
 
-    await fs.writeFile(STATE_FILE, JSON.stringify(existingData, null, config.JSON_INDENTATION));
-    console.log("상태 저장 완료:", state);
-  } catch (error) {
-    console.error("상태 파일 저장 오류:", error);
+    if (!updatedHistory) {
+      return res.status(httpStatusCode.NOT_FOUND).json({ errorMessage: "저장할 상태가 없습니다" });
+    }
+
+    return res
+      .status(httpStatusCode.CREATED)
+      .json({ message: "상태 저장이 완료되었습니다.", data: updatedHistory });
+  } catch (err) {
+    console.error("상태 저장 오류가 생겼습니다.", err);
+    return res
+      .status(httpStatusCode.INTERNAL_SERVER_ERROR)
+      .json({ errorMessage: "Internal Server Error" });
   }
-}
+});
 
 app.listen(config.API_SERVER_PORT, () =>
   console.log(`API 서버가 포트 ${config.API_SERVER_PORT}에서 실행 중...`)
