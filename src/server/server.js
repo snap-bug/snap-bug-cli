@@ -21,6 +21,25 @@ app.get("/states", async (req, res) => {
   }
 });
 
+app.get("/states/:id", async (req, res) => {
+  try {
+    const { id } = req.params;
+    const stateHistory = await getStateById(id);
+
+    if (!stateHistory) {
+      return res
+        .status(httpStatusCode.NOT_FOUND)
+        .json({ error: "해당 상태를 조회할 수 없습니다." });
+    }
+
+    return res.status(httpStatusCode.OK).json(stateHistory);
+  } catch (err) {
+    console.error("상태를 조회할 수 없습니다.", err);
+    return res
+      .status(httpStatusCode.INTERNAL_SERVER_ERROR)
+      .json({ errorMessage: "Internal Server Error" });
+  }
+});
 
 app.post("/states", async (req, res) => {
   try {
