@@ -9,6 +9,7 @@ export const trackStateChanges = async (page) => {
 
       const getFiberRoot = () => {
         const elements = document.body.children;
+
         for (let i = 0; i < elements.length; i++) {
           const element = elements[i];
           for (const key in element) {
@@ -37,9 +38,7 @@ export const trackStateChanges = async (page) => {
         ]);
 
         for (const key of Object.keys(stateValue)) {
-          if (invalidKeys.has(key)) {
-            return false;
-          }
+          if (invalidKeys.has(key)) return false;
         }
 
         if (Array.isArray(stateValue)) {
@@ -61,6 +60,7 @@ export const trackStateChanges = async (page) => {
 
         while (currentState) {
           const prevState = currentState.alternate?.memoizedState;
+
           if (
             isValidState(currentState.memoizedState) &&
             JSON.stringify(currentState.memoizedState) !== JSON.stringify(prevState)
@@ -75,6 +75,7 @@ export const trackStateChanges = async (page) => {
 
       const traverseFiberTree = (fiberNode) => {
         const newState = {};
+
         while (fiberNode) {
           if (fiberNode.memoizedState) {
             const componentName = fiberNode.type?.name || "Anonymous";
@@ -94,6 +95,7 @@ export const trackStateChanges = async (page) => {
         if (!fiberRoot) return;
 
         const newState = traverseFiberTree(fiberRoot.child);
+
         if (JSON.stringify(window.snapbugState) !== JSON.stringify(newState)) {
           window.snapbugState = newState;
           console.log("상태 변경 감지됨:", newState);
