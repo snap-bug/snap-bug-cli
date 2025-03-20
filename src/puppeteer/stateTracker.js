@@ -54,12 +54,31 @@ export const trackStateChanges = async (page) => {
         return true;
       };
 
+      const getStateData = (fiber) => {
+        const stateData = {};
+        let currentState = fiber.memoizedState;
+        let index = 0;
+
+        while (currentState) {
+          const prevState = currentState.alternate?.memoizedState;
+          if (
+            isValidState(currentState.memoizedState) &&
+            JSON.stringify(currentState.memoizedState) !== JSON.stringify(prevState)
+          ) {
+            stateData[`state_${index}`] = currentState.memoizedState;
+          }
+          currentState = currentState.next;
+          index++;
+        }
+        return stateData;
+      };
+
       const traverseFiberTree = (fiberNode) => {
         const newState = {};
         while (fiberNode) {
           if (fiberNode.memoizedState) {
             const componentName = fiberNode.type?.name || "Anonymous";
-            const stateData = fiberNode.memoizedState.memoizedState;
+            const stateData = getStateData(fiberNode);
 
             if (isValidState(stateData)) {
               newState[componentName] = stateData;
@@ -98,10 +117,23 @@ export const trackStateChanges = async (page) => {
         }
       };
 
-      const observer = new MutationObserver(detectStateChange);
-      const rootElement = document.getElementById("root") || document.getElementById("app");
-      if (rootElement) {
-        observer.observe(rootElement, { childList: true, subtree: true });
+      const fiberRoot = getFiberRoot();
+      if (fiberRoot) {
+        detectStateChange();
+
+        let fiberNode = fiberRoot.child;
+        while (fiberNode) {
+          const alternate = fiberNode.alternate;
+
+          if (
+            alternate &&
+            JSON.stringify(fiberNode.memoizedState) !== JSON.stringify(alternate.memoizedState)
+          ) {
+            detectStateChange();
+          }
+
+          fiberNode = fiberNode.sibling;
+        }
       }
 
       return "Puppeteer evaluate 실행 완료!";
