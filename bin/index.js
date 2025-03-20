@@ -19,7 +19,8 @@ program
 program
   .command("end")
   .description("디버깅 모드를 종료합니다. 상태 기록을 중단합니다.")
-  .action(() => {
+  .action(async () => {
+    await startDebugging();
     console.log("상태 기록을 중단했습니다.");
   });
 

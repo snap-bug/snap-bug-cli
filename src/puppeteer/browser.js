@@ -1,8 +1,15 @@
 import puppeteer from "puppeteer";
 import config from "../utils/config.js";
 
+let browser = null;
+
 export const openBrowser = async () => {
-  const browser = await puppeteer.launch({
+  if (browser) {
+    console.log("브라우저가 이미 실행 중입니다.");
+    return browser;
+  }
+
+  browser = await puppeteer.launch({
     headless: false,
     args: ["--no-sandbox"],
   });
@@ -22,4 +29,16 @@ export const getReactPage = async (browser) => {
   }
 
   return page;
+};
+
+export const closeBrowser = async () => {
+  if (browser) {
+    console.log("디버깅 모드를 종료합니다.");
+
+    await browser.close();
+    browser = null;
+    console.log("브라우저가 종료되었습니다.");
+  } else {
+    console.log("현재 디버깅 모드가 아닙니다.");
+  }
 };
