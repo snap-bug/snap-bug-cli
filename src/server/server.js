@@ -1,25 +1,25 @@
 import express from "express";
-import path from "path";
-import fs from "fs/promises";
+import cors from "cors";
 import config from "../utils/config.js";
+import httpStatusCode from "../utils/httpStatusCode.js";
+import { getStateById, getStateHistory, saveStateToFile } from "../utils/fileUtils.js";
 
 const app = express();
 app.use(express.json());
+app.use(cors());
 
-const STATE_FILE = path.join(process.cwd(), "snapbug-state.json");
-
-async function fileExists(filePath) {
+app.get("/states", async (req, res) => {
   try {
-    await fs.access(filePath);
-    return true;
-  } catch {
-    return false;
+    const stateHistory = await getStateHistory();
+
+    return res.status(httpStatusCode.OK).json(stateHistory);
+  } catch (err) {
+    console.error("상태를 읽어오지 못했습니다.", err);
+    return res
+      .status(httpStatusCode.INTERNAL_SERVER_ERROR)
+      .json({ errorMessage: "Internal Server Error" });
   }
-}
-
-export async function saveStateToFile(state) {
-  try {
-    let existingData = [];
+});
 
 
 app.post("/states", async (req, res) => {
