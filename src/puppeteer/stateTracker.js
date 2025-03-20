@@ -117,10 +117,23 @@ export const trackStateChanges = async (page) => {
         }
       };
 
-      const observer = new MutationObserver(detectStateChange);
-      const rootElement = document.getElementById("root") || document.getElementById("app");
-      if (rootElement) {
-        observer.observe(rootElement, { childList: true, subtree: true });
+      const fiberRoot = getFiberRoot();
+      if (fiberRoot) {
+        detectStateChange();
+
+        let fiberNode = fiberRoot.child;
+        while (fiberNode) {
+          const alternate = fiberNode.alternate;
+
+          if (
+            alternate &&
+            JSON.stringify(fiberNode.memoizedState) !== JSON.stringify(alternate.memoizedState)
+          ) {
+            detectStateChange();
+          }
+
+          fiberNode = fiberNode.sibling;
+        }
       }
 
       return "Puppeteer evaluate 실행 완료!";
