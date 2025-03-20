@@ -1,15 +1,13 @@
 import fs from "fs/promises";
-import path from "path";
-
-const PID_FILE = path.join(process.cwd(), "snapbug.pid");
+import config from "../utils/config.js";
 
 export const stopDebugging = async () => {
   try {
-    await fs.access(PID_FILE);
-    const pid = parseInt((await fs.readFile(PID_FILE, "utf-8")).trim(), 10);
+    await fs.access(config.PID_FILE_PATH);
+    const pid = parseInt((await fs.readFile(config.PID_FILE_PATH, "utf-8")).trim(), 10);
 
     process.kill(pid);
-    await fs.unlink(PID_FILE);
+    await fs.unlink(config.PID_FILE_PATH);
 
     console.log("프로세스를 종료했습니다.");
   } catch (err) {
