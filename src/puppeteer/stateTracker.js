@@ -87,7 +87,7 @@ export const trackStateChanges = async (page) => {
               method: "POST",
               headers: { "Content-Type": "application/json" },
               body: JSON.stringify({
-                timestamp: Date.now(),
+                timestamp: new Date().toISOString(),
                 state,
                 dom: domTree,
               }),
