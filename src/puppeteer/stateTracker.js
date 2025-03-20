@@ -4,7 +4,7 @@ export const trackStateChanges = async (page) => {
   try {
     await page.waitForSelector("#root, #app", { timeout: config.WAIT_TIME });
 
-    const evaluationResult = await page.evaluate(() => {
+    const evaluationResult = await page.evaluate(async (apiUrl) => {
       window.snapbugState = {};
 
       const getFiberRoot = () => {
@@ -70,7 +70,7 @@ export const trackStateChanges = async (page) => {
         return newState;
       };
 
-      const detectStateChange = () => {
+      const detectStateChange = async () => {
         const fiberRoot = getFiberRoot();
         if (!fiberRoot) return;
 
@@ -78,6 +78,23 @@ export const trackStateChanges = async (page) => {
         if (JSON.stringify(window.snapbugState) !== JSON.stringify(newState)) {
           window.snapbugState = newState;
           console.log("상태 변경 감지됨:", newState);
+
+          const domTree = document.documentElement.outerHTML;
+          const state = newState;
+
+          try {
+            await fetch(`${apiUrl}/states`, {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({
+                timestamp: Date.now(),
+                state,
+                dom: domTree,
+              }),
+            });
+          } catch (error) {
+            console.error("서버로 데이터 전송 실패:", error);
+          }
         }
       };
 
@@ -88,7 +105,7 @@ export const trackStateChanges = async (page) => {
       }
 
       return "Puppeteer evaluate 실행 완료!";
-    });
+    }, config.API_SERVER_URL);
 
     console.log("page.evaluate 실행 결과:", evaluationResult);
   } catch (error) {
