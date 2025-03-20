@@ -46,3 +46,15 @@ export async function saveStateToFile(newEntry) {
   }
 }
 
+export async function getStateHistory() {
+  try {
+    if (!(await fileExists(STATE_FILE))) return [];
+
+    const fileData = await fs.readFile(STATE_FILE, "utf-8");
+
+    return fileData ? JSON.parse(fileData) : [];
+  } catch (err) {
+    console.error("상태 파일 조회 오류");
+  }
+}
+
