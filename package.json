@@ -21,12 +21,14 @@
     "eslint-plugin-promise": "^6.6.0",
     "express": "^4.21.2",
     "globals": "^16.0.0",
-    "puppeteer": "^24.4.0"
+    "puppeteer": "^24.4.0",
+    "uuid": "^11.1.0"
   },
   "scripts": {
     "prepare": "husky",
     "format": "prettier --cache --write .",
-    "lint": "eslint ."
+    "lint": "eslint .",
+    "start": "node src/server/server.js"
   },
   "devDependencies": {
     "eslint-config-standard": "^17.1.0",
