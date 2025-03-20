@@ -13,6 +13,7 @@
   "dependencies": {
     "chalk": "^5.4.1",
     "commander": "^13.1.0",
+    "cors": "^2.8.5",
     "eslint": "^8.57.1",
     "eslint-js": "github:eslint/js",
     "eslint-plugin-import": "^2.31.0",
