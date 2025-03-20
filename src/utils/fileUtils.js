@@ -58,3 +58,12 @@ export async function getStateHistory() {
   }
 }
 
+export async function getStateById(id) {
+  try {
+    const stateHistory = await getStateHistory();
+
+    return stateHistory.find((history) => history.id === id) || null;
+  } catch (err) {
+    console.error("상태를 조회할 수 없습니다.", err);
+  }
+}
