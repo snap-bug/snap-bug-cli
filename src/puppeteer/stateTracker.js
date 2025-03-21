@@ -138,6 +138,19 @@ export const trackStateChanges = async (page) => {
         }
       }
 
+      const root = document.getElementById("root") || document.getElementById("app");
+      if (root) {
+        const observer = new MutationObserver(() => {
+          detectStateChange();
+        });
+        observer.observe(root, {
+          childList: true,
+          subtree: true,
+          attributes: true,
+        });
+      }
+      detectStateChange();
+
       return "Puppeteer evaluate 실행 완료!";
     }, config.API_SERVER_URL);
 
