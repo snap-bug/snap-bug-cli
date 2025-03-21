@@ -66,6 +66,8 @@ app.post("/states", async (req, res) => {
   }
 });
 
-app.listen(config.API_SERVER_PORT, () =>
-  console.log(`API 서버가 포트 ${config.API_SERVER_PORT}에서 실행 중...`)
-);
+export const startServer = () => {
+  app.listen(config.API_SERVER_PORT, () => {
+    console.log(`API 서버가 포트 ${config.API_SERVER_PORT}에서 실행 중...`);
+  });
+};
