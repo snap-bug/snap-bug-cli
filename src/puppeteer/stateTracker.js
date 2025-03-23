@@ -6,6 +6,7 @@ export const trackStateChanges = async (page) => {
 
     const evaluationResult = await page.evaluate(async (apiUrl) => {
       window.snapbugState = {};
+      window.snapbugPreviousDomHash = null;
 
       const getFiberRoot = () => {
         const elements = document.body.children;
@@ -96,6 +97,14 @@ export const trackStateChanges = async (page) => {
         return newState;
       };
 
+      const getDOMHash = async (domString) => {
+        const encoder = new TextEncoder();
+        const data = encoder.encode(domString);
+        const hashBuffer = await crypto.subtle.digest("SHA-256", data);
+        const hashArray = Array.from(new Uint8Array(hashBuffer));
+        return hashArray.map((b) => b.toString(16).padStart(2, "0")).join("");
+      };
+
       const detectStateChange = async () => {
         const fiberRoot = getFiberRoot();
         if (!fiberRoot) return;
@@ -106,7 +115,15 @@ export const trackStateChanges = async (page) => {
           window.snapbugState = newState;
           console.log("상태 변경 감지됨:", newState);
 
-          const domTree = document.documentElement.outerHTML;
+          const root = document.getElementById("root") || document.getElementById("app");
+          const domTree = root?.outerHTML || "";
+
+          const currentHash = await getDOMHash(domTree);
+          const isDomChanged = currentHash !== window.snapbugPreviousDomHash;
+
+          if (isDomChanged) {
+            window.snapbugPreviousDomHash = currentHash;
+          }
 
           try {
             await fetch(`${apiUrl}/states`, {
@@ -115,7 +132,7 @@ export const trackStateChanges = async (page) => {
               body: JSON.stringify({
                 timestamp: new Date().toISOString(),
                 state: newState,
-                dom: domTree,
+                dom: isDomChanged ? domTree : null,
               }),
             });
           } catch (error) {
