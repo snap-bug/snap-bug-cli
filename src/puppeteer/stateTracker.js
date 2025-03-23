@@ -22,6 +22,7 @@ export const trackStateChanges = async (page) => {
       };
 
       const isValidState = (stateValue) => {
+        if (stateValue === null) return true;
         if (typeof stateValue !== "object") return true;
 
         const invalidKeys = new Set([
@@ -42,12 +43,11 @@ export const trackStateChanges = async (page) => {
         }
 
         if (Array.isArray(stateValue)) {
-          const filteredArray = stateValue.filter((element) => {
-            if (typeof element !== "object") return true;
-            if ("rootComponent" in element) return false;
-          });
-
-          return filteredArray.length > 0;
+          for (const element of stateValue) {
+            if (element && typeof element === "object" && "rootComponent" in element) {
+              return false;
+            }
+          }
         }
 
         return true;
@@ -59,17 +59,13 @@ export const trackStateChanges = async (page) => {
         let index = 0;
 
         while (currentState) {
-          const prevState = currentState.alternate?.memoizedState;
-
-          if (
-            isValidState(currentState.memoizedState) &&
-            JSON.stringify(currentState.memoizedState) !== JSON.stringify(prevState)
-          ) {
+          if (isValidState(currentState.memoizedState)) {
             stateData[`state_${index}`] = currentState.memoizedState;
           }
           currentState = currentState.next;
           index++;
         }
+
         return stateData;
       };
 
@@ -85,7 +81,17 @@ export const trackStateChanges = async (page) => {
               newState[componentName] = stateData;
             }
           }
-          fiberNode = fiberNode.child;
+
+          if (fiberNode.child) {
+            fiberNode = fiberNode.child;
+          } else {
+            while (fiberNode && !fiberNode.sibling) {
+              fiberNode = fiberNode.return;
+            }
+            if (fiberNode) {
+              fiberNode = fiberNode.sibling;
+            }
+          }
         }
         return newState;
       };
@@ -101,7 +107,6 @@ export const trackStateChanges = async (page) => {
           console.log("상태 변경 감지됨:", newState);
 
           const domTree = document.documentElement.outerHTML;
-          const state = newState;
 
           try {
             await fetch(`${apiUrl}/states`, {
@@ -109,7 +114,7 @@ export const trackStateChanges = async (page) => {
               headers: { "Content-Type": "application/json" },
               body: JSON.stringify({
                 timestamp: new Date().toISOString(),
-                state,
+                state: newState,
                 dom: domTree,
               }),
             });
@@ -122,20 +127,6 @@ export const trackStateChanges = async (page) => {
       const fiberRoot = getFiberRoot();
       if (fiberRoot) {
         detectStateChange();
-
-        let fiberNode = fiberRoot.child;
-        while (fiberNode) {
-          const alternate = fiberNode.alternate;
-
-          if (
-            alternate &&
-            JSON.stringify(fiberNode.memoizedState) !== JSON.stringify(alternate.memoizedState)
-          ) {
-            detectStateChange();
-          }
-
-          fiberNode = fiberNode.sibling;
-        }
       }
 
       const root = document.getElementById("root") || document.getElementById("app");
@@ -147,8 +138,10 @@ export const trackStateChanges = async (page) => {
           childList: true,
           subtree: true,
           attributes: true,
+          characterData: true,
         });
       }
+
       detectStateChange();
 
       return "Puppeteer evaluate 실행 완료!";
