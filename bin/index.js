@@ -2,7 +2,6 @@
 
 import { program } from "commander";
 import startDebugging from "../src/commands/start.js";
-import { stopDebugging } from "../src/commands/end.js";
 
 program
   .version("1.0.0")
@@ -21,7 +20,6 @@ program
   .command("end")
   .description("디버깅 모드를 종료합니다. 상태 기록을 중단합니다.")
   .action(async () => {
-    await stopDebugging();
     console.log("상태 기록을 중단했습니다.");
   });
 
