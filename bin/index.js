@@ -2,6 +2,7 @@
 
 import { program } from "commander";
 import startDebugging from "../src/commands/start.js";
+import { run } from "../src/commands/run.js";
 
 program
   .version("1.0.0")
@@ -25,8 +26,15 @@ program
 
 program
   .command("run")
-  .description("현재 프로젝트를 Vercel를 통해 배포합니다.")
-  .action(() => {
+  .description("디버깅 UI를 빌드하고 Vercel을 통해 배포합니다.")
+  .option("--client-path <path>", "snapbug-client 경로", "../snapbug-client")
+  .option("--deploy", "Vercel에 자동 배포합니다.", true)
+  .action(async (options) => {
+    await run({
+      clientPath: options.clientPath,
+      deploy: options.deploy !== false,
+    });
+
     console.log("프로젝트가 배포되었습니다. URL: [URL]");
   });
 
