@@ -1,8 +1,8 @@
 {
-  "name": "snap-bug-cli",
-  "version": "1.0.0",
+  "name": "snapbug",
+  "version": "1.0.2",
   "engines": {
-    "node": "22.11.0"
+    "node": ">=18.0.0"
   },
   "main": "index.js",
   "bin": {
@@ -14,22 +14,22 @@
     "chalk": "^5.4.1",
     "commander": "^13.1.0",
     "cors": "^2.8.5",
-    "eslint": "^8.57.1",
-    "eslint-js": "github:eslint/js",
-    "eslint-plugin-import": "^2.31.0",
-    "eslint-plugin-n": "^16.6.2",
-    "eslint-plugin-promise": "^6.6.0",
     "express": "^4.21.2",
-    "globals": "^16.0.0",
     "uuid": "^11.1.0"
   },
   "scripts": {
     "prepare": "husky",
     "format": "prettier --cache --write .",
     "lint": "eslint .",
-    "start": "node src/server/server.js"
+    "start": "node src/server/server.js",
+    "dev": "node ./bin/index.js run --client-path=../snapbug-client"
   },
   "devDependencies": {
+    "eslint": "^8.57.1",
+    "eslint-js": "github:eslint/js",
+    "eslint-plugin-n": "16.6.2",
+    "eslint-plugin-import": "^2.31.0",
+    "eslint-plugin-promise": "^6.6.0",
     "eslint-config-standard": "^17.1.0",
     "husky": "9.1.7",
     "prettier": "3.5.3"
