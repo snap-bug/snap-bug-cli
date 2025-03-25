@@ -66,8 +66,20 @@ app.post("/states", async (req, res) => {
   }
 });
 
-export const startServer = () => {
-  app.listen(config.API_SERVER_PORT, () => {
-    console.log(`API 서버가 포트 ${config.API_SERVER_PORT}에서 실행 중...`);
-  });
+export const startServer = async () => {
+  try {
+    await new Promise((resolve, reject) => {
+      const server = app.listen(config.API_SERVER_PORT, () => {
+        console.log(`API 서버가 포트 ${config.API_SERVER_PORT}에서 실행 중...`);
+        resolve();
+      });
+
+      server.on("error", (err) => {
+        console.error("서버 실행 중 오류 발생:", err);
+        reject(err);
+      });
+    });
+  } catch (err) {
+    throw new Error("서버 실행에 실패했습니다.");
+  }
 };
