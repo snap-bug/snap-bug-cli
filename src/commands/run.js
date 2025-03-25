@@ -14,17 +14,24 @@ export async function run({ deploy, clientPath }) {
   const jsonPath = path.resolve("./snapbug-data.json");
   const targetJsonPath = path.join(absClientPath, "public", "snapbug-data.json");
 
+  if (!existsSync(absClientPath)) {
+    console.error(`clientPath 경로가 존재하지 않습니다: ${absClientPath}`);
+    process.exit(1);
+  }
+
   if (deploy && !process.env.VERCEL_TOKEN) {
     console.error("VERCEL_TOKEN 환경변수가 필요합니다.");
     process.exit(1);
   }
 
   if (!existsSync(jsonPath)) {
-    console.warn("snapbug-data.json 파일이 없어 기본 목데이터를 생성합니다.");
+    console.warn("snapbug-data.json 파일이 없어 생성합니다.");
     await createSampleSnapbugData(jsonPath);
   }
 
   try {
+    await fs.mkdir(path.dirname(targetJsonPath), { recursive: true });
+
     await fs.copyFile(jsonPath, targetJsonPath);
     console.log("상태 데이터 복사 완료");
 
