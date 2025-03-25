@@ -1,6 +1,7 @@
 import fs from "fs/promises";
 import path from "path";
 import { v4 as uuidv4 } from "uuid";
+import { writeFile } from "fs/promises";
 import config from "./config.js";
 
 const STATE_FILE = path.resolve(config.STATE_FILE_PATH);
@@ -72,4 +73,10 @@ export async function getStateById(id) {
     console.error("상태를 조회할 수 없습니다.", err);
     return null;
   }
+}
+
+export async function createSampleSnapbugData(path = "./snapbug-data.json") {
+  await writeFile(path, "[]", "utf-8");
+
+  console.log(`기본 snapbug-data 파일 생성 완료: ${path}`);
 }
