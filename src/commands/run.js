@@ -25,7 +25,7 @@ export async function run({ deploy, clientPath }) {
   }
 
   if (!existsSync(DATA_PATH)) {
-    console.warn("snapbug-data.json 파일이 없어 기본 데이터를 생성합니다.");
+    console.warn("snapbug-data.json 파일이 없어 생성합니다.");
     await createSampleSnapbugData(DATA_PATH);
   }
 
