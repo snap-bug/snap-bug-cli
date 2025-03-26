@@ -5,7 +5,7 @@ import httpStatusCode from "../utils/httpStatusCode.js";
 import { getStateById, getStateHistory, saveStateToFile } from "../utils/fileUtils.js";
 
 const app = express();
-app.use(express.json());
+app.use(express.json({ limit: "50mb" }));
 app.use(cors());
 
 app.get("/states", async (req, res) => {
