@@ -83,3 +83,7 @@ export const startServer = async () => {
     throw new Error("서버 실행에 실패했습니다.");
   }
 };
+
+if (process.argv[1] === new URL(import.meta.url).pathname) {
+  startServer();
+}
