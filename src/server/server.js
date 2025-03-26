@@ -6,7 +6,7 @@ import { getStateById, getStateHistory, saveStateToFile } from "../utils/fileUti
 
 const app = express();
 app.use(express.json({ limit: "50mb" }));
-app.use(cors());
+app.use(cors({ origin: "*" }));
 
 app.get("/states", async (req, res) => {
   try {
