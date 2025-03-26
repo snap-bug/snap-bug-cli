@@ -11,7 +11,7 @@ program
 program
   .command("run")
   .description("디버깅 UI를 빌드하고 Vercel을 통해 배포합니다.")
-  .option("--client-path <path>", "snapbug-client 경로", "../snapbug-client")
+  .option("--client-path <path>", "snapbug-client 경로", "../snap-bug-client")
   .option("--deploy", "Vercel에 자동 배포합니다.", true)
   .action(async (options) => {
     await run({
