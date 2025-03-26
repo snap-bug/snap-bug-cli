@@ -1,21 +1,12 @@
 #!/usr/bin/env node
 
 import { program } from "commander";
-import startDebugging from "../src/commands/start.js";
 import { run } from "../src/commands/run.js";
 
 program
   .version("1.0.0")
   .name("snapbug")
   .description("명령어 한 줄로 배포하고, 링크 하나로 팀원과 실시간으로 상태를 공유하세요!");
-
-program
-  .command("start")
-  .description("디버깅 모드를 시작합니다. 상태 기록을 활성화합니다.")
-  .action(async () => {
-    await startDebugging();
-    console.log("상태 기록 중 입니다.");
-  });
 
 program
   .command("run")
