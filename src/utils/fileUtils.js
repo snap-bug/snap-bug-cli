@@ -4,7 +4,7 @@ import { v4 as uuidv4 } from "uuid";
 import { writeFile } from "fs/promises";
 import config from "./config.js";
 
-const STATE_FILE = path.resolve(config.STATE_FILE_PATH);
+const STATE_FILE = path.resolve(config.PUBLIC_DIR, config.STATE_FILE_NAME);
 
 async function fileExists(filePath) {
   try {
@@ -75,7 +75,7 @@ export async function getStateById(id) {
   }
 }
 
-export async function createSampleSnapbugData(path = "./snapbug-data.json") {
+export async function createSampleSnapbugData(path = STATE_FILE) {
   await writeFile(path, "[]", "utf-8");
 
   console.log(`기본 snapbug-data 파일 생성 완료: ${path}`);
