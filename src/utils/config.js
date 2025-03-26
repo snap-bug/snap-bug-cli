@@ -11,7 +11,6 @@ const config = {
   JSON_INDENTATION: 2,
   WAIT_TIME: 5000,
   STATE_FILE_PATH: path.join(PUBLIC_DIR, "snapbug-data.json"),
-  PID_FILE_PATH: path.join(PUBLIC_DIR, "snapbug.pid"),
 };
 
 export default config;
