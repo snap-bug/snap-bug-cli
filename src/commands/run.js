@@ -3,6 +3,9 @@ import fs from "fs/promises";
 import { existsSync } from "fs";
 import { runCommand } from "../utils/util.js";
 import { createSampleSnapbugData } from "../utils/fileUtils.js";
+import dotenv from "dotenv";
+
+dotenv.config();
 
 export async function run({ deploy, clientPath }) {
   if (!clientPath) {
