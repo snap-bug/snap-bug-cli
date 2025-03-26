@@ -1,12 +1,11 @@
 {
   "name": "snapbug",
-  "version": "1.0.2",
+  "version": "1.0.6",
   "engines": {
     "node": ">=18.0.0"
   },
-  "main": "index.js",
   "bin": {
-    "snapbug": "./index.js"
+    "snapbug": "bin/index.js"
   },
   "type": "module",
   "license": "ISC",
@@ -14,7 +13,9 @@
     "chalk": "^5.4.1",
     "commander": "^13.1.0",
     "cors": "^2.8.5",
+    "dotenv": "^16.4.7",
     "express": "^4.21.2",
+    "snapbug": "^1.0.3",
     "uuid": "^11.1.0"
   },
   "scripts": {
@@ -22,7 +23,7 @@
     "format": "prettier --cache --write .",
     "lint": "eslint .",
     "start": "node src/server/server.js",
-    "dev": "node ./bin/index.js run --client-path=../snapbug-client"
+    "run": "node ./bin/index.js run --client-path=../snap-bug-client"
   },
   "devDependencies": {
     "eslint": "^8.57.1",

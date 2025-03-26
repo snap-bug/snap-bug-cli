@@ -1,7 +1,6 @@
 #!/usr/bin/env node
 
 import { program } from "commander";
-import startDebugging from "../src/commands/start.js";
 import { run } from "../src/commands/run.js";
 
 program
@@ -10,17 +9,9 @@ program
   .description("명령어 한 줄로 배포하고, 링크 하나로 팀원과 실시간으로 상태를 공유하세요!");
 
 program
-  .command("start")
-  .description("디버깅 모드를 시작합니다. 상태 기록을 활성화합니다.")
-  .action(async () => {
-    await startDebugging();
-    console.log("상태 기록 중 입니다.");
-  });
-
-program
   .command("run")
   .description("디버깅 UI를 빌드하고 Vercel을 통해 배포합니다.")
-  .option("--client-path <path>", "snapbug-client 경로", "../snapbug-client")
+  .option("--client-path <path>", "snapbug-client 경로", "../snap-bug-client")
   .option("--deploy", "Vercel에 자동 배포합니다.", true)
   .action(async (options) => {
     await run({

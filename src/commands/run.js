@@ -3,6 +3,9 @@ import fs from "fs/promises";
 import { existsSync } from "fs";
 import { runCommand } from "../utils/util.js";
 import { createSampleSnapbugData } from "../utils/fileUtils.js";
+import dotenv from "dotenv";
+
+dotenv.config();
 
 export async function run({ deploy, clientPath }) {
   if (!clientPath) {
@@ -45,10 +48,9 @@ export async function run({ deploy, clientPath }) {
 
     if (deploy) {
       const distPath = path.join(absClientPath, "dist");
-      await deployToVercel(distPath);
+      const url = await deployToVercel(distPath);
+      console.log(`🎉 프로젝트가 배포되었습니다: ${url}`);
     }
-
-    console.log("🎉 프로젝트가 배포되었습니다. URL: [URL]");
   } catch (err) {
     console.error("실행 중 에러 발생: ", err.message);
     process.exit(1);
@@ -65,11 +67,21 @@ async function deployToVercel(distPath) {
   }
 
   try {
-    await runCommand("npx", ["vercel", "deploy", "--prod", "--yes", `--token=${token}`], {
-      cwd: distPath,
-    });
+    const result = await runCommand(
+      "npx",
+      ["vercel", "deploy", "--prod", "--yes", `--token=${token}`],
+      {
+        cwd: distPath,
+      }
+    );
 
-    console.log("Vercel 배포 완료");
+    const match = result.match(/https:\/\/.*\.vercel\.app/);
+
+    if (!match?.[0]) {
+      throw new Error("배포 URL 파싱에 실패했습니다.");
+    }
+
+    return match[0];
   } catch (err) {
     console.error("배포 실패:", err.message);
     process.exit(1);

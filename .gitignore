@@ -1,3 +1,6 @@
 node_modules
 .DS_Store
 snapbug-data.json
+
+#환경 변수
+.env
