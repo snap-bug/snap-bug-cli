@@ -5,8 +5,8 @@ import httpStatusCode from "../utils/httpStatusCode.js";
 import { getStateById, getStateHistory, saveStateToFile } from "../utils/fileUtils.js";
 
 const app = express();
-app.use(express.json());
-app.use(cors());
+app.use(express.json({ limit: "50mb" }));
+app.use(cors({ origin: "*" }));
 
 app.get("/states", async (req, res) => {
   try {
@@ -43,13 +43,13 @@ app.get("/states/:id", async (req, res) => {
 
 app.post("/states", async (req, res) => {
   try {
-    const { timestamp, state, dom } = req.body;
+    const { timestamp, state, dom, styles } = req.body;
 
     if (!timestamp || !state) {
       return res.status(httpStatusCode.BAD_REQUEST).json({ errorMessage: "Bad Request" });
     }
 
-    const updatedHistory = await saveStateToFile({ timestamp, state, dom });
+    const updatedHistory = await saveStateToFile({ timestamp, state, dom, styles });
 
     if (!updatedHistory) {
       return res.status(httpStatusCode.NOT_FOUND).json({ errorMessage: "저장할 상태가 없습니다" });
