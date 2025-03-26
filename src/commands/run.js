@@ -48,10 +48,9 @@ export async function run({ deploy, clientPath }) {
 
     if (deploy) {
       const distPath = path.join(absClientPath, "dist");
-      await deployToVercel(distPath);
+      const url = await deployToVercel(distPath);
+      console.log(`🎉 프로젝트가 배포되었습니다: ${url}`);
     }
-
-    console.log("🎉 프로젝트가 배포되었습니다. URL: [URL]");
   } catch (err) {
     console.error("실행 중 에러 발생: ", err.message);
     process.exit(1);
@@ -68,11 +67,16 @@ async function deployToVercel(distPath) {
   }
 
   try {
-    await runCommand("npx", ["vercel", "deploy", "--prod", "--yes", `--token=${token}`], {
-      cwd: distPath,
-    });
+    const result = await runCommand(
+      "npx",
+      ["vercel", "deploy", "--prod", "--yes", `--token=${token}`],
+      {
+        cwd: distPath,
+      }
+    );
 
-    console.log("Vercel 배포 완료");
+    const match = result.match(/https:\/\/.*\.vercel\.app/);
+    return match?.[0] || "URL 파싱 실패";
   } catch (err) {
     console.error("배포 실패:", err.message);
     process.exit(1);
