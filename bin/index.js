@@ -18,13 +18,6 @@ program
   });
 
 program
-  .command("end")
-  .description("디버깅 모드를 종료합니다. 상태 기록을 중단합니다.")
-  .action(async () => {
-    console.log("상태 기록을 중단했습니다.");
-  });
-
-program
   .command("run")
   .description("디버깅 UI를 빌드하고 Vercel을 통해 배포합니다.")
   .option("--client-path <path>", "snapbug-client 경로", "../snapbug-client")
@@ -34,8 +27,6 @@ program
       clientPath: options.clientPath,
       deploy: options.deploy !== false,
     });
-
-    console.log("프로젝트가 배포되었습니다. URL: [URL]");
   });
 
 program
