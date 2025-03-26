@@ -11,7 +11,7 @@ export async function run({ deploy, clientPath }) {
   }
 
   const absClientPath = path.resolve(clientPath);
-  const jsonPath = path.resolve("./snapbug-data.json");
+  const DATA_PATH = path.resolve(process.cwd(), "snapbug-data.json");
   const targetJsonPath = path.join(absClientPath, "public", "snapbug-data.json");
 
   if (!existsSync(absClientPath)) {
@@ -24,16 +24,16 @@ export async function run({ deploy, clientPath }) {
     process.exit(1);
   }
 
-  if (!existsSync(jsonPath)) {
-    console.warn("snapbug-data.json 파일이 없어 생성합니다.");
-    await createSampleSnapbugData(jsonPath);
+  if (!existsSync(DATA_PATH)) {
+    console.warn("snapbug-data.json 파일이 없어 기본 데이터를 생성합니다.");
+    await createSampleSnapbugData(DATA_PATH);
   }
 
   try {
     await fs.mkdir(path.dirname(targetJsonPath), { recursive: true });
 
-    await fs.copyFile(jsonPath, targetJsonPath);
-    console.log("상태 데이터 복사 완료");
+    await fs.copyFile(DATA_PATH, targetJsonPath);
+    console.log("상태 데이터 복사 완료:", targetJsonPath);
 
     console.log("의존성 설치 중 입니다...");
     await runCommand("npm", ["install"], { cwd: absClientPath });
@@ -47,6 +47,8 @@ export async function run({ deploy, clientPath }) {
       const distPath = path.join(absClientPath, "dist");
       await deployToVercel(distPath);
     }
+
+    console.log("🎉 프로젝트가 배포되었습니다. URL: [URL]");
   } catch (err) {
     console.error("실행 중 에러 발생: ", err.message);
     process.exit(1);
@@ -70,6 +72,6 @@ async function deployToVercel(distPath) {
     console.log("Vercel 배포 완료");
   } catch (err) {
     console.error("배포 실패:", err.message);
-    throw err;
+    process.exit(1);
   }
 }
