@@ -76,7 +76,12 @@ async function deployToVercel(distPath) {
     );
 
     const match = result.match(/https:\/\/.*\.vercel\.app/);
-    return match?.[0] || "URL 파싱 실패";
+
+    if (!match?.[0]) {
+      throw new Error("배포 URL 파싱에 실패했습니다.");
+    }
+
+    return match[0];
   } catch (err) {
     console.error("배포 실패:", err.message);
     process.exit(1);
