@@ -1,6 +1,6 @@
 {
   "name": "snapbug",
-  "version": "1.0.6",
+  "version": "1.0.8",
   "engines": {
     "node": ">=18.0.0"
   },
@@ -15,7 +15,8 @@
     "cors": "^2.8.5",
     "dotenv": "^16.4.7",
     "express": "^4.21.2",
-    "snapbug": "^1.0.3",
+    "snapbug": "^1.0.7",
+    "snapbug-client-ui": "^0.0.4",
     "uuid": "^11.1.0"
   },
   "scripts": {
