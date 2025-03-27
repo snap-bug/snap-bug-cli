@@ -17,31 +17,34 @@ async function fileExists(filePath) {
 
 export async function saveStateToFile(newEntry) {
   try {
+    let dataToSave = [];
     let existingData = [];
 
     if (await fileExists(STATE_FILE)) {
-      try {
-        const fileData = await fs.readFile(STATE_FILE, "utf-8");
+      const fileData = await fs.readFile(STATE_FILE, "utf-8");
+      existingData = fileData ? JSON.parse(fileData) : [];
+    }
 
-        existingData = fileData ? JSON.parse(fileData) : [];
-      } catch (error) {
-        console.error("파일 읽기를 실패했습니다.", error);
-      }
+    const isFirstRecord = existingData.length === 0;
 
+    if (isFirstRecord) {
+      console.log("상태 기록 시작합니다.");
+      dataToSave = [newEntry];
+    } else {
       const lastEntry = existingData[existingData.length - 1];
-
       if (!newEntry.dom && lastEntry?.dom) {
         newEntry.dom = lastEntry.dom;
       }
+
+      dataToSave = [...existingData, newEntry];
     }
 
     newEntry.id = uuidv4();
-    existingData.push(newEntry);
 
-    await fs.writeFile(STATE_FILE, JSON.stringify(existingData, null, config.JSON_INDENTATION));
+    await fs.writeFile(STATE_FILE, JSON.stringify(dataToSave, null, config.JSON_INDENTATION));
     console.log("파일 저장에 성공했습니다.", newEntry);
 
-    return existingData;
+    return dataToSave;
   } catch (err) {
     console.error("파일 저장을 실패했습니다.", err);
   }
