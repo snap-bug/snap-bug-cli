@@ -2,60 +2,95 @@ import path from "path";
 import fs from "fs/promises";
 import { existsSync } from "fs";
 import { runCommand } from "../utils/util.js";
-import { createSampleSnapbugData } from "../utils/fileUtils.js";
-import dotenv from "dotenv";
 import { fileURLToPath } from "url";
+import { createRequire } from "module";
+import dotenv from "dotenv";
 
-const __dirname = path.dirname(fileURLToPath(import.meta.url));
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 dotenv.config({ path: path.resolve(__dirname, "../../.env") });
 
+const require = createRequire(import.meta.url);
+
+const exitWithError = (message) => {
+  console.error(`${message}`);
+  process.exit(1);
+};
+
+async function ensureClientInstalled() {
+  try {
+    require.resolve("snap-bug-client/package.json", {
+      paths: [path.resolve(__dirname, "../../node_modules")],
+    });
+
+    return;
+  } catch {
+    console.log("snap-bug-client가 설치되지 않았습니다. 자동 설치를 진행합니다...");
+
+    try {
+      await runCommand("npm", ["install", "snap-bug-client"], {
+        cwd: path.resolve(__dirname, "../../"),
+      });
+    } catch (err) {
+      exitWithError(`snap-bug-client 설치 실패: ${err.message}`);
+    }
+  }
+}
+
 export async function run({ deploy }) {
-  const clientPkg = "snapbug-client-ui";
-  const clientPath = path.resolve("node_modules", clientPkg);
-  const DATA_PATH = path.resolve("snapbug-data.json");
-  const targetJsonPath = path.join(clientPath, "public", "snapbug-data.json");
+  await ensureClientInstalled();
 
-  if (!existsSync(clientPath)) {
-    console.log(`📦 ${clientPkg} 패키지 설치 중...`);
-    await runCommand("npm", ["install", clientPkg]);
+  let clientPath;
+  try {
+    const cliNodeModules = path.resolve(__dirname, "../../node_modules");
+    const resolved = require.resolve("snap-bug-client/package.json", {
+      paths: [cliNodeModules],
+    });
+
+    clientPath = path.dirname(resolved);
+  } catch {
+    exitWithError("snap-bug-client 패키지 경로를 찾을 수 없습니다.");
   }
 
-  if (!existsSync(DATA_PATH)) {
-    console.warn("snapbug-data.json 파일이 없어 생성합니다.");
-    await createSampleSnapbugData(DATA_PATH);
+  const distPath = path.join(clientPath, "dist");
+  const localStatePath = path.resolve(__dirname, "../../public/snapbug-state.json");
+  const distStatePath = path.join(distPath, "snapbug-state.json");
+
+  if (!existsSync(localStatePath)) {
+    exitWithError(
+      "상태 추적 데이터(snapbug-state.json)가 없습니다. 먼저 상태 기록을 실행해주세요."
+    );
   }
 
   try {
-    await fs.mkdir(path.dirname(targetJsonPath), { recursive: true });
-    await fs.copyFile(DATA_PATH, targetJsonPath);
-    console.log("상태 데이터 복사 완료:", targetJsonPath);
+    const vitePath = path.join(clientPath, "node_modules", ".bin", "vite");
+
+    console.log("디버깅 UI 빌드 중...");
+
+    if (!existsSync(vitePath)) {
+      console.warn("vite가 설치되지 않았습니다. 의존성을 설치합니다...");
+      await runCommand("npm", ["install"], { cwd: clientPath });
+      await runCommand("npm", ["run", "build"], { cwd: clientPath });
+      console.log("빌드 완료!");
+    }
   } catch (err) {
-    console.error("데이터 복사 중 에러 발생:", err.message);
-    process.exit(1);
+    exitWithError(`빌드 실패: ${err.message}`);
   }
 
   try {
-    console.log("디버깅 UI 빌드 중 입니다...");
-    await runCommand("npm", ["install"], { cwd: clientPath });
-    await runCommand("npm", ["run", "build"], { cwd: clientPath });
-    console.log("빌드 완료!");
+    await fs.copyFile(localStatePath, distStatePath);
+    console.log("상태 JSON 복사 완료:", distStatePath);
   } catch (err) {
-    console.error("빌드 실패:", err.message);
-    process.exit(1);
+    exitWithError(`상태 JSON 복사 실패: ${err.message}`);
   }
 
   if (deploy) {
-    const distPath = path.join(clientPath, "dist");
     const token = process.env.VERCEL_TOKEN;
-
-    dotenv.config({ path: path.resolve(__dirname, "../../.env") });
-    if (!token) {
-      console.error("VERCEL_TOKEN 환경변수가 필요합니다.");
-      process.exit(1);
-    }
+    if (!token) exitWithError("VERCEL_TOKEN 환경변수가 필요합니다.");
 
     try {
       console.log("Vercel 배포 중...");
+
       const result = await runCommand(
         "npx",
         ["vercel", "deploy", "--prod", "--yes", `--token=${token}`],
@@ -63,14 +98,12 @@ export async function run({ deploy }) {
       );
 
       const match = result.match(/https:\/\/.*\.vercel\.app/);
-      if (!match?.[0]) {
-        throw new Error("배포 URL 파싱에 실패했습니다.");
-      }
+      const url = match?.[0];
+      if (!url) throw new Error("배포 URL을 찾을 수 없습니다.");
 
-      console.log(`🎉 프로젝트가 배포되었습니다: ${match[0]}`);
+      console.log(`🎉 배포 완료: ${url}`);
     } catch (err) {
-      console.error("배포 실패:", err.message);
-      process.exit(1);
+      exitWithError(`배포 실패: ${err.message}`);
     }
   }
 }
