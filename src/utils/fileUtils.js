@@ -81,5 +81,5 @@ export async function getStateById(id) {
 export async function createSampleSnapbugData(path = STATE_FILE) {
   await writeFile(path, "[]", "utf-8");
 
-  console.log(`기본 snapbug-data 파일 생성 완료: ${path}`);
+  console.log(`기본 snapbug-state 파일 생성 완료: ${path}`);
 }
